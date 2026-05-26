@@ -456,6 +456,7 @@ function buildCard(item, palace, onClickFn) {
 ══════════════════════════════ */
 
 function openQuiz(item, palace) {
+    console.log('openQuiz called:', item.contentsKor);
     quizItem   = item;
     quizPalace = palace;
 
@@ -524,6 +525,7 @@ function openQuiz(item, palace) {
     const panel = document.getElementById('quiz-panel');
     panel.classList.add('open');
     panel.scrollTop = 0;
+    console.log('quiz-panel open class:', panel.classList.toString(), 'z-index:', getComputedStyle(panel).zIndex, 'transform:', getComputedStyle(panel).transform);
 }
 
 function handleAnswer(isCorrect, selected, correct) {
