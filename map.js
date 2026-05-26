@@ -686,5 +686,5 @@ function closeDetail() {
 window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('quiz-back').addEventListener('click', closeQuiz);
     document.getElementById('detail-back').addEventListener('click', closeDetail);
-    promptForKey();
+    loadKakaoMap('2d57d9b02b0dd86c3df3afcb0e17c7c8');
 });
