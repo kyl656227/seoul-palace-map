@@ -178,41 +178,6 @@ let currentItems     = [];  // 퀴즈 오답 생성용
 let quizItem         = null;
 let quizPalace       = null;
 
-/* ── 카카오 API 키 입력 ── */
-function promptForKey() {
-    const saved = localStorage.getItem('kakao_key');
-    if (saved) { loadKakaoMap(saved); return; }
-
-    const overlay = document.getElementById('key-overlay');
-    const input   = document.getElementById('kakao-key-input');
-    const btn     = document.getElementById('kakao-key-btn');
-
-    overlay.style.display = 'flex';
-
-    btn.addEventListener('click', () => {
-        const key = input.value.trim();
-        if (!key) { alert('API 키를 입력해 주세요.'); return; }
-        localStorage.setItem('kakao_key', key);
-        overlay.style.display = 'none';
-        loadKakaoMap(key);
-    });
-
-    input.addEventListener('keydown', e => { if (e.key === 'Enter') btn.click(); });
-}
-
-function makeEmojiCursor(emoji) {
-    const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'>`
-              + `<text y='36' font-size='36'>${emoji}</text></svg>`;
-    return `url("data:image/svg+xml,${encodeURIComponent(svg)}") 4 36, auto`;
-}
-
-function loadKakaoMap(key) {
-    const script  = document.createElement('script');
-    script.src    = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${key}&autoload=false`;
-    script.onload = () => kakao.maps.load(initMap);
-    script.onerror = () => alert('카카오맵 로드 실패 — API 키를 확인해 주세요.');
-    document.head.appendChild(script);
-}
 
 /* 위키피디아 REST API로 대표 사진 미리 가져오기 */
 async function prefetchPhotos() {
@@ -229,12 +194,11 @@ async function prefetchPhotos() {
 
 /* ── 지도 초기화 ── */
 function initMap() {
-    map = new kakao.maps.Map(document.getElementById('map'), {
-        center: new kakao.maps.LatLng(37.5740, 126.9820),
-        level: 5,
-    });
-    map.addControl(new kakao.maps.ZoomControl(),    kakao.maps.ControlPosition.RIGHT);
-    map.addControl(new kakao.maps.MapTypeControl(), kakao.maps.ControlPosition.TOPRIGHT);
+    map = L.map('map').setView([37.5740, 126.9820], 14);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 19,
+    }).addTo(map);
 
     buildSidebar();
     buildMuseumSidebar();
@@ -278,37 +242,29 @@ function buildMuseumSidebar() {
 
 /* ── 박물관 마커 생성 (다이아몬드) ── */
 function createMuseumMarker(museum) {
-    const overlay = new kakao.maps.CustomOverlay({
-        position: new kakao.maps.LatLng(museum.lat, museum.lng),
-        content: `
-            <div class="custom-marker" data-id="${museum.id}">
-                <div class="marker-tooltip">
-                    ${museum.photo
-                        ? `<img class="marker-tooltip-img" src="${museum.photo}" alt="${museum.name}">`
-                        : `<div class="marker-tooltip-emoji">${museum.emoji}</div>`}
-                    <div class="marker-tooltip-label">
-                        <span class="marker-tooltip-dot" style="background:${museum.color}"></span>
-                        ${museum.name}
-                    </div>
+    const icon = L.divIcon({
+        html: `<div class="custom-marker" data-id="${museum.id}">
+            <div class="marker-tooltip">
+                ${museum.photo
+                    ? `<img class="marker-tooltip-img" src="${museum.photo}" alt="${museum.name}">`
+                    : `<div class="marker-tooltip-emoji">${museum.emoji}</div>`}
+                <div class="marker-tooltip-label">
+                    <span class="marker-tooltip-dot" style="background:${museum.color}"></span>
+                    ${museum.name}
                 </div>
-                <div class="marker-diamond-wrap" style="--dot-color:${museum.color}">
-                    <div class="marker-diamond"></div>
-                    <div class="marker-diamond-pulse"></div>
-                </div>
-                <div class="marker-label">${museum.name}</div>
-            </div>`,
-        yAnchor: 1.05,
-        zIndex: 2,
+            </div>
+            <div class="marker-diamond-wrap" style="--dot-color:${museum.color}">
+                <div class="marker-diamond"></div>
+                <div class="marker-diamond-pulse"></div>
+            </div>
+            <div class="marker-label">${museum.name}</div>
+        </div>`,
+        className: '',
+        iconSize: [0, 0],
+        iconAnchor: [12, 12],
     });
-    overlay.setMap(map);
-
-    setTimeout(() => {
-        const el = overlay.a;
-        if (el) {
-            el.style.cursor = makeEmojiCursor(museum.emoji);
-            el.addEventListener('click', () => selectMuseum(museum.id));
-        }
-    }, 0);
+    L.marker([museum.lat, museum.lng], { icon }).addTo(map)
+        .on('click', () => selectMuseum(museum.id));
 }
 
 /* ── 박물관 선택 ── */
@@ -319,8 +275,7 @@ function selectMuseum(museumId) {
     document.querySelectorAll('.palace-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('btn-' + museumId)?.classList.add('active');
 
-    map.setLevel(4);
-    map.panTo(new kakao.maps.LatLng(museum.lat, museum.lng));
+    map.flyTo([museum.lat, museum.lng], 15);
 
     selectedPalaceId = museumId;
     currentPalace    = museum;
@@ -359,40 +314,31 @@ function loadMuseumInfo(museum) {
     );
 }
 
-/* ── 마커 생성 ── */
+/* ── 궁궐 마커 생성 ── */
 function createMarker(palace) {
-    const overlay = new kakao.maps.CustomOverlay({
-        position: new kakao.maps.LatLng(palace.lat, palace.lng),
-        content: `
-            <div class="custom-marker" data-id="${palace.id}">
-                <div class="marker-tooltip">
-                    ${palace.photo
-                        ? `<img class="marker-tooltip-img" src="${palace.photo}" alt="${palace.name}">`
-                        : `<div class="marker-tooltip-emoji">${palace.emoji}</div>`}
-                    <div class="marker-tooltip-label">
-                        <span class="marker-tooltip-dot" style="background:${palace.color}"></span>
-                        ${palace.name}
-                    </div>
+    const icon = L.divIcon({
+        html: `<div class="custom-marker" data-id="${palace.id}">
+            <div class="marker-tooltip">
+                ${palace.photo
+                    ? `<img class="marker-tooltip-img" src="${palace.photo}" alt="${palace.name}">`
+                    : `<div class="marker-tooltip-emoji">${palace.emoji}</div>`}
+                <div class="marker-tooltip-label">
+                    <span class="marker-tooltip-dot" style="background:${palace.color}"></span>
+                    ${palace.name}
                 </div>
-                <div class="marker-dot" style="--dot-color:${palace.color}">
-                    <div class="marker-dot-inner"></div>
-                    <div class="marker-dot-pulse"></div>
-                </div>
-                <div class="marker-label">${palace.name}</div>
-            </div>`,
-        yAnchor: 1.05,
-        zIndex: 3,
+            </div>
+            <div class="marker-dot" style="--dot-color:${palace.color}">
+                <div class="marker-dot-inner"></div>
+                <div class="marker-dot-pulse"></div>
+            </div>
+            <div class="marker-label">${palace.name}</div>
+        </div>`,
+        className: '',
+        iconSize: [0, 0],
+        iconAnchor: [12, 12],
     });
-    overlay.setMap(map);
-
-    setTimeout(() => {
-        const el = overlay.a;
-        if (el) {
-            const emojiCursor = makeEmojiCursor(palace.emoji);
-            el.style.cursor = emojiCursor;
-            el.addEventListener('click', () => selectPalace(palace.id));
-        }
-    }, 0);
+    L.marker([palace.lat, palace.lng], { icon }).addTo(map)
+        .on('click', () => selectPalace(palace.id));
 }
 
 /* ── 궁궐 선택 ── */
@@ -403,8 +349,7 @@ function selectPalace(palaceId) {
     document.querySelectorAll('.palace-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('btn-' + palaceId)?.classList.add('active');
 
-    map.setLevel(4);
-    map.panTo(new kakao.maps.LatLng(palace.lat, palace.lng));
+    map.flyTo([palace.lat, palace.lng], 15);
 
     selectedPalaceId = palaceId;
     currentPalace    = palace;
@@ -686,5 +631,5 @@ function closeDetail() {
 window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('quiz-back').addEventListener('click', closeQuiz);
     document.getElementById('detail-back').addEventListener('click', closeDetail);
-    loadKakaoMap('2d57d9b02b0dd86c3df3afcb0e17c7c8');
+    initMap();
 });

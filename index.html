@@ -5,22 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>서울 궁궐 지도</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@2.0/nanumSquare.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- 카카오 API 키 입력 -->
-<div id="key-overlay" style="display:none">
-    <div class="key-box">
-        <h2>카카오맵 API 키 입력</h2>
-        <p>
-            <a href="https://developers.kakao.com" target="_blank">developers.kakao.com</a>에서<br>
-            JavaScript 키를 발급받아 입력하세요.
-        </p>
-        <input id="kakao-key-input" type="text" placeholder="카카오 JavaScript API 키">
-        <button id="kakao-key-btn">지도 열기</button>
-    </div>
-</div>
 
 <div id="app">
     <aside id="sidebar">
@@ -113,6 +102,7 @@
     </div>
 </div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="map.js"></script>
 </body>
 </html>
