@@ -447,7 +447,10 @@ function buildCard(item, palace, onClickFn) {
     </svg>`;
     card.appendChild(arrow);
 
-    card.addEventListener('click', () => (onClickFn ?? openQuiz)(item, palace));
+    card.addEventListener('click', () => {
+        console.log('card clicked:', item.contentsKor);
+        (onClickFn ?? openQuiz)(item, palace);
+    });
     return card;
 }
 
