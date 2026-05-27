@@ -498,7 +498,7 @@ function createMuseumMarker(museum) {
         iconAnchor: [12, 12],
     });
     L.marker([museum.lat, museum.lng], { icon }).addTo(map)
-        .on('click', () => selectMuseum(museum.id));
+        .on('click', () => { selectMuseum(museum.id); showPlaceDetail(museum); });
 }
 
 /* ── 박물관 선택 ── */
@@ -575,7 +575,7 @@ function createMarker(palace) {
         iconAnchor: [12, 12],
     });
     L.marker([palace.lat, palace.lng], { icon }).addTo(map)
-        .on('click', () => selectPalace(palace.id));
+        .on('click', () => { selectPalace(palace.id); showPlaceDetail(palace); });
 }
 
 /* ── 궁궐 선택 ── */
@@ -872,6 +872,68 @@ function openDetail(item, palace) {
 
 function closeDetail() {
     document.getElementById('detail-panel').classList.remove('open');
+}
+
+/* ── 마커 클릭 시 장소 개요 상세 패널 ── */
+function showPlaceDetail(place) {
+    const isMuseum = typeof place.id === 'string';
+
+    /* 히어로 이미지 */
+    const hero = document.getElementById('detail-hero');
+    hero.innerHTML = '';
+    if (place.photo) {
+        const img = document.createElement('img');
+        img.src = place.photo;
+        img.alt = place.name;
+        img.onerror = () => {
+            hero.innerHTML = `<div class="detail-hero-placeholder" style="font-size:64px;height:160px">${place.emoji}</div>`;
+        };
+        hero.appendChild(img);
+    } else {
+        hero.innerHTML = `<div class="detail-hero-placeholder" style="font-size:64px;height:160px">${place.emoji}</div>`;
+    }
+
+    /* 네비 이름 (빈칸) */
+    document.getElementById('detail-palace-name').textContent = '';
+
+    /* 카테고리 · 주소 */
+    const typeLabel = isMuseum
+        ? (currentLang === 'ko' ? '박물관·미술관' : 'Museum')
+        : (currentLang === 'ko' ? '궁궐' : 'Palace');
+    document.getElementById('detail-category').textContent = typeLabel + ' · ' + place.address;
+
+    /* 타이틀 */
+    document.getElementById('detail-title').textContent = currentLang === 'ko' ? place.name : place.nameEn;
+
+    /* 설명 — PALACE_DATA / MUSEUM_DATA 첫 번째 항목 */
+    let desc = '';
+    if (isMuseum) {
+        desc = MUSEUM_DATA[place.id]?.explanationKor || '';
+    } else {
+        desc = PALACE_DATA[place.id]?.[0]?.explanationKor || '';
+    }
+    document.getElementById('detail-desc').textContent = desc;
+
+    /* 외부 링크 버튼 */
+    const actions = document.getElementById('detail-actions');
+    actions.innerHTML = '';
+    const link = isMuseum
+        ? (MUSEUM_DATA[place.id]?.link || 'https://www.heritage.go.kr')
+        : 'https://www.heritage.go.kr';
+    const a = document.createElement('a');
+    a.href   = link;
+    a.target = '_blank';
+    a.rel    = 'noopener noreferrer';
+    a.className = 'detail-cta';
+    a.innerHTML = `자세히 보기 <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M2 7H12M8 3L12 7L8 11" stroke="currentColor" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>`;
+    actions.appendChild(a);
+
+    const panel = document.getElementById('detail-panel');
+    panel.classList.add('open');
+    panel.scrollTop = 0;
 }
 
 /* ── 초기화 ── */

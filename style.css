@@ -365,6 +365,8 @@ html, body {
 .custom-marker:hover .marker-tooltip {
     opacity: 1;
     transform: translateX(-50%) translateY(0) scale(1);
+    pointer-events: auto;
+    cursor: pointer;
 }
 
 .marker-tooltip-img {
