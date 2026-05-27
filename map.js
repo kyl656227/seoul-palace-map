@@ -178,6 +178,21 @@ let currentItems     = [];  // 퀴즈 오답 생성용
 let quizItem         = null;
 let quizPalace       = null;
 
+/* ── 모바일 사이드바 ── */
+function openMobileSidebar() {
+    document.getElementById('sidebar').classList.add('mobile-open');
+    document.getElementById('sidebar-backdrop').classList.add('visible');
+    const btn = document.getElementById('mobile-sidebar-toggle');
+    if (btn) btn.textContent = '닫기';
+}
+
+function closeMobileSidebar() {
+    document.getElementById('sidebar').classList.remove('mobile-open');
+    document.getElementById('sidebar-backdrop').classList.remove('visible');
+    const btn = document.getElementById('mobile-sidebar-toggle');
+    if (btn) btn.textContent = '목록 보기';
+}
+
 
 /* 위키피디아 REST API로 대표 사진 미리 가져오기 */
 async function prefetchPhotos() {
@@ -283,6 +298,7 @@ function selectMuseum(museumId) {
     closeQuiz();
     closeDetail();
     loadMuseumInfo(museum);
+    openMobileSidebar();
 }
 
 /* ── 박물관 정보 표시 ── */
@@ -357,6 +373,7 @@ function selectPalace(palaceId) {
     closeQuiz();
     closeDetail();
     loadPalaceInfo(palace);
+    openMobileSidebar();
 }
 
 /* ── 궁궐 정보 불러오기 ── */
@@ -631,5 +648,25 @@ function closeDetail() {
 window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('quiz-back').addEventListener('click', closeQuiz);
     document.getElementById('detail-back').addEventListener('click', closeDetail);
+
+    /* 모바일 사이드바 토글 */
+    const toggleBtn = document.getElementById('mobile-sidebar-toggle');
+    const backdrop  = document.getElementById('sidebar-backdrop');
+    const handle    = document.querySelector('.sidebar-handle');
+    const sidebar   = document.getElementById('sidebar');
+
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => {
+            if (sidebar.classList.contains('mobile-open')) {
+                closeMobileSidebar();
+            } else {
+                openMobileSidebar();
+            }
+        });
+    }
+
+    if (backdrop) backdrop.addEventListener('click', closeMobileSidebar);
+    if (handle)   handle.addEventListener('click', closeMobileSidebar);
+
     initMap();
 });

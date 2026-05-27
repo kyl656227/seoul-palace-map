@@ -905,3 +905,95 @@ html, body {
 
 .key-box button:hover  { background: var(--primary-focus); }
 .key-box button:active { transform: scale(0.97); }
+
+/* ══════════════════════════════
+   모바일 전용 요소 (데스크톱 숨김)
+══════════════════════════════ */
+.mobile-sidebar-toggle { display: none; }
+.sidebar-handle        { display: none; }
+
+#sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 99;
+}
+
+#sidebar-backdrop.visible { display: block; }
+
+/* ══════════════════════════════
+   모바일 반응형 (≤ 768px)
+══════════════════════════════ */
+@media (max-width: 768px) {
+
+    /* 사이드바 → 하단 시트 */
+    #sidebar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        min-width: unset;
+        height: 68vh;
+        border-right: none;
+        border-top: 1px solid var(--hairline);
+        border-radius: 20px 20px 0 0;
+        transform: translateY(100%);
+        transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 100;
+        box-shadow: 0 -8px 32px rgba(0,0,0,0.18);
+    }
+
+    #sidebar.mobile-open { transform: translateY(0); }
+
+    /* 드래그 핸들 */
+    .sidebar-handle {
+        display: flex;
+        justify-content: center;
+        padding: 12px 0 8px;
+        flex-shrink: 0;
+        cursor: pointer;
+    }
+
+    .sidebar-handle::after {
+        content: '';
+        width: 40px;
+        height: 4px;
+        background: var(--body-muted);
+        border-radius: 2px;
+    }
+
+    /* 지도 위 떠있는 목록 버튼 */
+    .mobile-sidebar-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        bottom: 32px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--ink);
+        color: var(--on-dark);
+        border: none;
+        border-radius: var(--r-pill);
+        padding: 13px 28px;
+        font-family: inherit;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        z-index: 20;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.32);
+        white-space: nowrap;
+        transition: opacity 0.15s;
+    }
+
+    .mobile-sidebar-toggle:active { opacity: 0.75; }
+
+    /* 퀴즈·상세 패널 → 전체화면 */
+    .quiz-panel,
+    .detail-panel {
+        position: fixed;
+        z-index: 200;
+    }
+}
