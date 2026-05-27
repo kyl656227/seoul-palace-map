@@ -203,9 +203,7 @@ html, body {
 
 /* ── 정보 패널 ── */
 .info-panel {
-    flex: 1;
     padding: 18px 14px 14px;
-    overflow-y: auto;
 }
 
 .info-panel.hidden { display: none; }

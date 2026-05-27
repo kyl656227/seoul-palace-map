@@ -393,6 +393,16 @@ function selectCourse(course) {
     openMobileSidebar();
 }
 
+/* ── 정보 패널로 부드럽게 스크롤 ── */
+function scrollToInfoPanel() {
+    const sidebar = document.getElementById('sidebar');
+    const panel   = document.getElementById('info-panel');
+    if (!sidebar || !panel) return;
+    // 사이드바 내부 스크롤: panel의 offsetTop 기준으로 이동
+    const offset = panel.offsetTop - 12;
+    sidebar.scrollTo({ top: offset, behavior: 'smooth' });
+}
+
 /* ── 지하철 정보 표시 ── */
 function showSubwayInfo(id) {
     const el = document.getElementById('subway-info');
@@ -521,6 +531,7 @@ function loadMuseumInfo(museum) {
 
     loading.classList.add('hidden');
     panel.classList.remove('hidden');
+    scrollToInfoPanel();
 
     const entry = MUSEUM_DATA[museum.id];
     currentItems = [];
@@ -602,6 +613,7 @@ function loadPalaceInfo(palace) {
         .then(xml => {
             loading.classList.add('hidden');
             panel.classList.remove('hidden');
+            scrollToInfoPanel();
             currentItems = parseXml(xml);
             if (currentItems.length === 0) {
                 list.innerHTML = '<p style="color:#7a7a7a;font-size:12px;padding:8px 0">정보가 없습니다.</p>';
@@ -612,6 +624,7 @@ function loadPalaceInfo(palace) {
         .catch(() => {
             loading.classList.add('hidden');
             panel.classList.remove('hidden');
+            scrollToInfoPanel();
             const fallback = PALACE_DATA[palace.id] ?? [];
             currentItems = fallback;
             if (fallback.length === 0) {
